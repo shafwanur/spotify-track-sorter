@@ -172,8 +172,10 @@ class SpotifyAPI:
                 name = p['track']['name']
                 print(id, name)
                 if self.DONE.get(id, -1) != -1:
-                    broke = True
-                    break
+                    res = input(f'{name} has been handled before. Terminate process? [y/n]').lower()
+                    if res == 'y':
+                        broke = True
+                        break
                 
                 songs[id] = name
 
