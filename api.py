@@ -59,6 +59,10 @@ class SpotifyAPI:
         return self.ACCESS_TOKEN
 
     def process_track(self, track_id = '5VSqvL5NLxBr7uMNfjwLt8'): # feelslikeimfallinginlove from Coldplay
+        '''
+        Get a single track and return its popularity, album name, track name, and URI.
+        '''
+        
         url = f'https://api.spotify.com/v1/tracks/{track_id}'
         headers = {
             'Authorization': f'Bearer {self.access_token()}',
@@ -69,6 +73,10 @@ class SpotifyAPI:
             return (response['popularity'], response['album']['name'], response['name'], response['uri'])
 
     def process_tracks(self, album_id = '1PdMoahMiMnqWfzWZs3xSI'): # Moon Music (Full Mood Edition) from Coldplay
+        '''
+        Get all tracks in an album and append them to the all_songs list.
+        '''
+        
         url = f'https://api.spotify.com/v1/albums/{album_id}/tracks'
         headers = {
             'Authorization': f'Bearer {self.access_token()}',
@@ -77,10 +85,19 @@ class SpotifyAPI:
             'limit': 50,
         }
         response = requests.get(url = url, headers = headers, params = params)
+        tmp_array = []
         for item in response.json()['items']:
-            self.all_songs.append(self.process_track(track_id = item['id']))
+            tmp_array.append(self.process_track(track_id = item['id']))
+        
+        tmp_array.sort()
+        tmp_array = list(reversed(tmp_array))
+        self.all_songs.extend(tmp_array)
     
     def process_albums(self, artist_id = '4gzpq5DPGxSnKTe4SA8HAU'): # Coldplay
+        '''
+        Get all albums of an artist and process each album's tracks.
+        '''
+        
         url = f'https://api.spotify.com/v1/artists/{artist_id}/albums'
         headers = {
             'Authorization': f'Bearer {self.access_token()}',
@@ -101,6 +118,10 @@ class SpotifyAPI:
                 break
         
     def create_playlist(self, artist_name = 'Coldplay'):
+        '''
+        Create a new playlist for the artist with the name "All Of: {artist_name}".
+        '''
+        
         url = f'https://api.spotify.com/v1/users/{USER_ID}/playlists'
         data = json.dumps({
             'name': f'All Of: {artist_name}',
@@ -116,6 +137,10 @@ class SpotifyAPI:
         return response.json()['id']
 
     def add_to_playlist(self, playlist_id, uris):
+        '''
+        Add tracks to the specified playlist with playlist_id.
+        '''
+
         url = f'https://api.spotify.com/v1/playlists/{playlist_id}/tracks'
         headers = {
             'Authorization': f'Bearer {self.access_token()}',
@@ -129,6 +154,10 @@ class SpotifyAPI:
             print("Success: Playlist Add")
     
     def get_artist_name(self, artist_id):
+        '''
+        Get the name of the artist using their ID.
+        '''
+        
         url = f'https://api.spotify.com/v1/artists/{artist_id}'
         headers = {
             'Authorization': f'Bearer {self.access_token()}',
@@ -137,14 +166,21 @@ class SpotifyAPI:
         response = requests.get(url = url, headers = headers)
         return response.json()['name']
 
-    def magic(self, artist_id = '4gzpq5DPGxSnKTe4SA8HAU'):
+    def sorted_songs(self, artist_id):
+        # TODO: implement later.
+        pass
+
+    def magic(self, artist_id = '4gzpq5DPGxSnKTe4SA8HAU'): # Coldplay
+        '''
+        Main function to process the artist's albums, create a playlist, and add all songs to it.
+        '''
+
         artist_name = self.get_artist_name(artist_id)
         playlist_id = self.create_playlist(artist_name)
         self.process_albums(artist_id)
         print(f"Song Count: {len(self.all_songs)}") 
         print(self.all_songs[:10])
-        self.all_songs.sort()
-        self.all_songs = list(reversed(self.all_songs))
+
         print("Songs Sorted: ")
         uris = []
 
@@ -163,9 +199,3 @@ class SpotifyAPI:
         
         print(f"Success: All {len(self.all_songs)} songs added to playlist {playlist_id}")
     
-api = SpotifyAPI()
-
-url = "https://open.spotify.com/artist/5Rl15oVamLq7FbSb0NNBNy?si=PC7iNNfhS3CBrB5mVTOdiw"
-artist_id = url[url.rfind("/")+1:url.find("?")]
-
-api.magic(artist_id)
