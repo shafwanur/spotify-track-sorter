@@ -1,3 +1,4 @@
 *.txt
 !scopes.txt
 .env
+__pycache__
