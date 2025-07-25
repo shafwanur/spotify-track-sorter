@@ -73,7 +73,14 @@ class SpotifyAPI:
         response = requests.get(url = url, headers = headers)
         if response.status_code == 200:
             response = response.json()
-            return (response['popularity'], response['album']['name'], response['album']['release_date'], response['name'], response['uri'])
+            return {
+                "popularity": response['popularity'],
+                "album_name": response['album']['name'],
+                "release_date": response['album']['release_date'],
+                "track_name": response['name'],
+                "uri": response['uri'],
+                "album_type": response['album']['album_type']
+            }
 
     def process_album_tracks(self, album_id = '1PdMoahMiMnqWfzWZs3xSI'): # Moon Music (Full Mood Edition) from Coldplay
         '''
@@ -89,7 +96,9 @@ class SpotifyAPI:
         }
         response = requests.get(url = url, headers = headers, params = params)
         for item in response.json()['items']:
-            self.all_songs.append(self.process_track(track_id = item['id']))
+            p = self.process_track(track_id = item['id'])
+            # 
+            self.all_songs.append(p)
     
     def process_albums(self, artist_id = '4gzpq5DPGxSnKTe4SA8HAU'): # Coldplay
         '''
@@ -177,33 +186,29 @@ class SpotifyAPI:
         '''
         
         # Types of Sorting available
-        # Tuple Format: (popularity, albumname, releasedate, trackname, uri)
         if self.arg == "album-sort": 
-            self.all_songs = sorted(self.all_songs, key = lambda x: (x[2], x[1], -x[0]))
+            self.all_songs = sorted(self.all_songs, key = lambda x: (x["release_date"], x["album_name"], -x["popularity"]))
         if self.arg == "global-sort": 
-            self.all_songs = sorted(self.all_songs, key = lambda x : -x[0])
+            self.all_songs = sorted(self.all_songs, key = lambda x : -x["popularity"])
         if self.arg == "all-of": 
-            self.all_songs = sorted(self.all_songs, key = lambda x : (x[2], x[1]))
+            self.all_songs = sorted(self.all_songs, key = lambda x : (x["release_date"], x["album_name"]))
 
         # Deleting Duplicates Layer
-        songs_in_album = dict()
-        for p in self.all_songs:
-            songs_in_album[p[1]] = songs_in_album.get(p[1], 0) + 1
-
+        tmp = self.all_songs.copy()
+        tmp = sorted(tmp, key=lambda x: (x["track_name"], x["album_type"], x["release_date"])) # Song belongs in album (IMPORTANT: NOT SINGLE), where it appears FIRST (earliest release date)
         song_album_mapping = dict()
-        for p in sorted(self.all_songs, key = lambda x: (x[3], -songs_in_album[x[1]])):
-            song_name = p[3]
-            if song_name not in song_album_mapping:
-                song_album_mapping[song_name] = p[1] # p[1] is the albumname
+        for p in tmp:
+            if not p['track_name'] in song_album_mapping:
+                song_album_mapping[p['track_name']] = p['album_name']
 
-        without_dups = [] # without the duplicates
+        without_dups = [] # songs without the duplicates
         for p in self.all_songs:
-            songname, albumname = p[3], p[1]
+            songname, albumname = p["track_name"], p["album_name"]
             if song_album_mapping[songname] == albumname:
                 without_dups.append(p)
 
         self.all_songs[:] = without_dups
-        
+
     def magic(self, artist_id = '4gzpq5DPGxSnKTe4SA8HAU'): # Coldplay
         # TODO: need to update the logic here, make it übersichtlicher than just being "magic"
         '''
@@ -230,7 +235,7 @@ class SpotifyAPI:
         file_name = os.path.join("stats", f"{artist_name}.txt")
         with open(file_name, 'a', encoding='utf-8') as file:
             for song in self.all_songs:
-                uris.append(song[-1])
+                uris.append(song["uri"])
                 print(song)
                 file.write(f"{song}\n")
         
@@ -244,4 +249,3 @@ class SpotifyAPI:
         
         # Success
         print(f"Success: All {len(self.all_songs)} songs added to playlist {playlist_id}")
-    
