@@ -97,7 +97,6 @@ class SpotifyAPI:
         response = requests.get(url = url, headers = headers, params = params)
         for item in response.json()['items']:
             p = self.process_track(track_id = item['id'])
-            # 
             self.all_songs.append(p)
     
     def process_albums(self, artist_id = '4gzpq5DPGxSnKTe4SA8HAU'): # Coldplay
@@ -201,10 +200,22 @@ class SpotifyAPI:
             if not p['track_name'] in song_album_mapping:
                 song_album_mapping[p['track_name']] = p['album_name']
 
-        without_dups = [] # songs without the duplicates
+        # Keywords to sort by
+        filter_keywords = [
+            "live",
+            "acoustic",
+            "a cappella",
+            "acapella",
+            "instrumental",
+            "karaoke",
+            "live at",
+            "studio version"
+        ]
+        contains_junk = lambda songname: any(k in songname.lower() for k in filter_keywords)
+        without_dups = [] # songs without the duplicates & without live/instrumentals, etc
         for p in self.all_songs:
             songname, albumname = p["track_name"], p["album_name"]
-            if song_album_mapping[songname] == albumname:
+            if song_album_mapping[songname] == albumname and not contains_junk(songname):
                 without_dups.append(p)
 
         self.all_songs[:] = without_dups
