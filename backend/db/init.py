@@ -1,21 +1,20 @@
-# backend/db/init_db.py
 from sqlalchemy import create_engine, text
-import time
 
-def init_db():
-    engine = create_engine("postgresql://postgres:postgres@db:5432/spotify")
+engine = create_engine("postgresql://postgres:postgres@db:5432/spotify")
+
+def init_db(): 
+    '''
+    For now, creates the initial required tables. 
+    '''
     with engine.connect() as conn:
-        conn.execute(text("""
-            CREATE TABLE IF NOT EXISTS identity (
+        query = text("""
+            CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
-                _name VARCHAR(100),
-                surname VARCHAR(100)
+                username VARCHAR(100) UNIQUE, 
+                password VARCHAR(255)
             );
-        """))
-        conn.execute(text("""
-            INSERT INTO identity (_name, surname)
-            VALUES ('Michel', 'Palefrois'), ('Renaud', 'Bertop')
-            ON CONFLICT DO NOTHING;
-        """))
+        """) # IMPORTANT: username is email. 
+        conn.execute(query)
         conn.commit()
-        print("DB initialized.")
+
+        print("Success: DB initialized.")
