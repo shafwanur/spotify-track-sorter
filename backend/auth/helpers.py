@@ -22,7 +22,6 @@ load_dotenv()
 
 ALGORITHM = os.getenv("ALGORITHM")
 SECRET_KEY = os.getenv("SECRET_KEY")
-print(f"FUCK YOU {SECRET_KEY=}")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -39,7 +38,7 @@ def get_user(username: str):
         result = conn.execute(query, {"username": username}).fetchone()
         if result:
             row = result._mapping
-            return UserInDB(username=row["username"], hashed_password=row["password"])
+            return UserInDB(id=row["id"], username=row["username"], hashed_password=row["password"])
 
 def authenticate_user(username: str, password: str):
     user = get_user(username)
