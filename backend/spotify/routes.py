@@ -56,7 +56,7 @@ def auth_callback(request: Request):
         "state": state
     })
 
-@router.post("/refresh_token") # expects the auth_code to generate refresh_token. or if it exists (in memory in the dict), just returns it. refresh_tokens are permanent.
+@router.post("/token/refresh") # expects the auth_code to generate refresh_token. or if it exists (in memory in the dict), just returns it. refresh_tokens are permanent.
 def retrieve_refresh_token(payload: RefreshTokenRequest): # TODO: should probably be async functions ... will change later. 
     if payload.auth_code: # if auth_code passed, generate new refresh_token, store in db 
         refresh_token = create_refresh_token(auth_code=payload.auth_code)
@@ -67,7 +67,7 @@ def retrieve_refresh_token(payload: RefreshTokenRequest): # TODO: should probabl
         
     return {"refresh_token": refresh_token} # TODO: proper json to return? 
 
-@router.post("/access_token")
+@router.post("/token/access")
 def retrieve_access_token(payload: AccessTokenRequest):
     # Try retrieving from cache
     access_token = get_cached_access_token(user_id=payload.user_id)
