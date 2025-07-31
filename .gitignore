@@ -1,3 +1,4 @@
+cli-app/
 !scopes.txt
 .env
 __pycache__
