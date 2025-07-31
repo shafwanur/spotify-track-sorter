@@ -17,6 +17,7 @@ from auth.helpers import (
     generate_random_string, 
     get_current_user,
     create_jwt_token,
+    db_update,
 )
 
 from spotify.helpers import (
@@ -66,13 +67,16 @@ def auth_callback(request: Request) -> Token:
     refresh_token = create_refresh_token(auth_code=auth_code)
     access_token = create_access_token(refresh_token=refresh_token)
     spotify_user_id = create_spotify_user_id(access_token=access_token)
-    
+
+    # Store spotify_user_id and refresh_token in the database. In case it exists, just update it.
+    db_update() # will be changed in the next commit :)
+
     access_token = create_jwt_token(
         data={"sub": spotify_user_id}
     )
     return Token(access_token=access_token, token_type="bearer")
 
 @router.get("/validate")
-async def read_users_me(current_user: User = Depends(get_current_user)):
+async def read_users_me(current_user: User = Depends(get_current_user)) -> User:
     '''For a token passed through the request body (Authorization Bearer), validate it.'''
     return current_user
