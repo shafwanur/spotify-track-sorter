@@ -2,8 +2,8 @@ from pydantic import BaseModel
 
 
 class PlaylistCreationRequest(BaseModel):
-    playlist_name: str
     spotify_user_id: str
+    playlist_name: str
 
 
 class PopulatePlaylistRequest(BaseModel):

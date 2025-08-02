@@ -87,7 +87,7 @@ def populate_playlist(payload: RemoveTracksRequest, access_token: str = Header(.
     }
 
 
-@router.get("/artist")
+@router.get("/artists")
 def search_artist(payload: ArtistSearchRequest, access_token: str = Header(...)):
     """
     Searches artist by name
