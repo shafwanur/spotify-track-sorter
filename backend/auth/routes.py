@@ -58,13 +58,13 @@ async def auth_callback(request: Request) -> Token:
         return JSONResponse({"error": "No auth_code returned"}, status_code=400)
 
     # from auth_code, make refresh_token and access_token and spotify_user_id.
-    # tokenize the spotify_user_id and send over.
+    # tokenize the spotify_user_id and send over. TODO: and the refresh token too? 
     refresh_token = create_refresh_token(auth_code=auth_code)
     access_token = create_access_token(refresh_token=refresh_token)
     spotify_user_id = create_spotify_user_id(access_token=access_token)
 
     # Store spotify_user_id and refresh_token in the database. In case it exists, just update it.
-    await db_update(spotify_user_id, refresh_token) # yippie, user gets saved
+    await db_update(spotify_user_id, refresh_token)
 
     access_token = create_jwt_token(
         data={"sub": spotify_user_id}

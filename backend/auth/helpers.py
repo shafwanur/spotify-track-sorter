@@ -1,14 +1,11 @@
-import base64
 import os
 from datetime import datetime, timedelta, timezone
 import random
 import string
 
-from dotenv import load_dotenv
-from passlib.context import CryptContext
 import jwt
 from jwt.exceptions import InvalidTokenError
-import requests
+from dotenv import load_dotenv
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -17,7 +14,6 @@ from db.init import get_session
 from auth.models import User
 from db.models import User
 
-# Global & Environment variables
 load_dotenv()
 BACKEND_ENDPOINT = os.getenv("BACKEND_ENDPOINT")
 SPOTIFY_ENDPOINT = "https://accounts.spotify.com"
@@ -71,7 +67,7 @@ def create_jwt_token(data: dict):
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:  
-    # Expects token to be passed from the request header ("Authorization": Bearer Token)
+    # Expects token to be passed to the request header like ("Authorization": Bearer Token)
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

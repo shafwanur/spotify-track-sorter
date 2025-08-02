@@ -1,23 +1,14 @@
-# Standard library imports
 import json
 import requests
-from datetime import timedelta
 
-# FastAPI imports
 from fastapi import APIRouter, Header
 
-# Third-party imports
-
-# Local imports
 from api.models import (
     PlaylistCreationRequest,
     PopulatePlaylistRequest,
     RemoveTracksRequest,
     ArtistSearchRequest,
 )
-
-# Global & Environment Variables
-
 
 router = APIRouter(prefix="/api", tags=["api"])
 

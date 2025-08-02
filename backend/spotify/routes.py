@@ -24,7 +24,7 @@ router = APIRouter(prefix="/spotify", tags=["spotify"])
 
 @router.post("/token/access") # will be called very often
 def retrieve_access_token(payload: AccessTokenRequest):
-    # Try retrieving from cache
+    # Try retrieving from cache, otherwise create it 
     access_token = get_cached_access_token(spotify_user_id=payload.spotify_user_id)
     if access_token is None:  # if it doesn't exist, create a new one
         access_token = create_access_token(payload)
@@ -34,7 +34,9 @@ def retrieve_access_token(payload: AccessTokenRequest):
 
 @router.get("/me")
 def get_me(access_token: str = Header(...)):
-    '''Given access_token, return spotify_user_id. 
+    '''
+    Given access_token, return spotify_user_id. 
+    Will probably never be called, but keeping an endpoint. 
     '''
     spotify_user_id = create_spotify_user_id(access_token=access_token)
     return {"spotify_user_id": spotify_user_id}

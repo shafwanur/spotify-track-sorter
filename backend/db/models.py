@@ -15,6 +15,7 @@ class User(Base):
     spotify_user_id: Mapped[str] = mapped_column(primary_key=True, autoincrement=False)
     refresh_token: Mapped[str] = mapped_column(Text, nullable=False) 
 
+# --- Example Tables from sqlalchemy
 # class TestUser(Base):
 #     __tablename__ = "test_user_account"
 #     id: Mapped[int] = mapped_column(primary_key=True)
