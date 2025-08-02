@@ -1,16 +1,12 @@
-# Standard library imports
 import os
 from urllib.parse import urlencode
 from dotenv import load_dotenv
 
-# FastAPI imports
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi import Depends
 
-# Third party imports 
-
-# Local imports
+from db.init import get_session
 from auth.models import Token, User
 from auth.helpers import (
     get_scopes,
@@ -27,7 +23,6 @@ from spotify.helpers import (
 )
 
 
-# Global & Environment Variables
 load_dotenv()
 BACKEND_ENDPOINT = os.getenv("BACKEND_ENDPOINT")
 SPOTIFY_ENDPOINT = "https://accounts.spotify.com"
@@ -56,7 +51,7 @@ async def spotify_login_for_access_token():
 
 
 @router.get("/success")
-def auth_callback(request: Request) -> Token:
+async def auth_callback(request: Request) -> Token:
     auth_code = request.query_params.get("code")
 
     if not auth_code:
@@ -69,7 +64,7 @@ def auth_callback(request: Request) -> Token:
     spotify_user_id = create_spotify_user_id(access_token=access_token)
 
     # Store spotify_user_id and refresh_token in the database. In case it exists, just update it.
-    db_update() # will be changed in the next commit :)
+    await db_update(spotify_user_id, refresh_token) # yippie, user gets saved
 
     access_token = create_jwt_token(
         data={"sub": spotify_user_id}

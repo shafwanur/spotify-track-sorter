@@ -1,32 +1,22 @@
-from sqlalchemy import create_engine, text
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
-engine = create_engine("postgresql://postgres:postgres@db:5432/spotify")
+from db.models import Base
+
+engine = create_async_engine("postgresql+asyncpg://postgres:postgres@db:5432/spotify", echo=True)
+async_session = async_sessionmaker(engine, expire_on_commit=False)
+
+# db/session.py
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def get_session():
+    async with async_session() as session:
+        yield session
 
 
-def init_db():
-    """
-    For now, creates the initial required tables.
-    """
-    with engine.connect() as conn:
-        # Create users table
-        query = text("""
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(100) UNIQUE, 
-                password VARCHAR(255)
-            );
-        """)  # IMPORTANT: username is email.
-        conn.execute(query)
+async def init_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-        # Create refresh_tokens table
-        refresh_token_query = text("""
-            CREATE TABLE IF NOT EXISTS refresh_tokens (
-                id INTEGER PRIMARY KEY REFERENCES users(id),
-                spotify_user_id TEXT NULL,
-                refresh_token TEXT
-            );
-        """)
-        conn.execute(refresh_token_query)
-        conn.commit()
-
-        print("Success: DB initialized.")
+    print("Success: DB initialized.")

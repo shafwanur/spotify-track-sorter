@@ -13,8 +13,9 @@ import requests
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-from db.init import engine
+from db.init import get_session
 from auth.models import User
+from db.models import User
 
 # Global & Environment variables
 load_dotenv()
@@ -86,5 +87,19 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     
     return User(spotify_user_id=spotify_user_id)
 
-def db_update():
-    pass
+async def db_update(spotify_user_id: str, refresh_token: str):
+    '''
+    Store spotify_user_id and refresh_token in the database, update refresh_token if already exists
+    '''
+    async with get_session() as session:
+        user = await session.get(User, spotify_user_id)
+
+        if user is None: # create new entry
+            new_user = User(spotify_user_id=spotify_user_id, refresh_token=refresh_token)
+            session.add(new_user)
+            await session.commit()
+            return
+
+        # else, update previous entry with the "new" refresh_token on each login
+        user.refresh_token = refresh_token
+        await session.commit()

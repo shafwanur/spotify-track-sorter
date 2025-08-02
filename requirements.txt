@@ -7,3 +7,4 @@ python-multipart
 pyjwt
 passlib[bcrypt]
 requests
+asyncpg

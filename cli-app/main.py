@@ -1,10 +1,10 @@
 from api import SpotifyAPI
 
-api = SpotifyAPI(arg = "album-sort")
+api = SpotifyAPI(arg = "global-sort")
 
 print("Enter the Spotify URL of the artist:", end = " ")
 # url = input()
-url = "https://open.spotify.com/artist/53XhwfbYqKCa1cC15pYq2q?si=5_0Sym8GRnO3-jFBos3RFw"
+url = "https://open.spotify.com/artist/1moxjboGR7GNWYIMWsRjgG?si=lpBNIkuqTFm2A_USw9ADzg"
 
 artist_id = url[url.rfind("/")+1:url.find("?")]
 
